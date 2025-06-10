@@ -5,13 +5,13 @@
         <!-- Company Info -->
         <div class="col-span-1 md:col-span-2">
           <div class="flex items-center space-x-2 mb-4">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span class="text-white font-bold text-lg">S</span>
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold text-lg">R</span>
             </div>
-            <span class="text-xl font-bold text-gray-900">Store</span>
+            <span class="text-xl font-bold text-gray-900">The Relic</span>
           </div>
           <p class="text-gray-600 mb-4">
-            Modern e-commerce store built with Nuxt 3 and WooCommerce.
+            Discover unique and rare collectibles at The Relic Store.
           </p>
           <div class="flex space-x-4">
             <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -48,7 +48,7 @@
       </div>
 
       <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-600">
-        <p>&copy; 2025 Store. All rights reserved.</p>
+        <p>&copy; 2025 The Relic Store. All rights reserved.</p>
       </div>
     </div>
   </footer>

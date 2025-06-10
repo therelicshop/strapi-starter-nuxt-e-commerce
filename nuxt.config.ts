@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     woocommerceSecret: process.env.WOOCOMMERCE_CONSUMER_SECRET,
     // Public keys (exposed to client-side)
     public: {
-      woocommerceUrl: process.env.WOOCOMMERCE_URL || 'https://your-store.com',
+      woocommerceUrl: process.env.WOOCOMMERCE_URL || 'https://shop.therelic.cc',
       apiUrl: '/api'
     }
   },

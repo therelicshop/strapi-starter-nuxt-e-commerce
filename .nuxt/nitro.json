@@ -1,5 +1,5 @@
 {
-  "date": "2025-06-10T18:14:04.510Z",
+  "date": "2025-06-10T19:23:09.651Z",
   "preset": "nitro-dev",
   "framework": {
     "name": "nuxt",
@@ -9,10 +9,10 @@
     "nitro": "2.11.12"
   },
   "dev": {
-    "pid": 21,
+    "pid": 23,
     "workerAddress": {
       "host": "localhost",
-      "port": 54728
+      "port": 50620
     }
   }
 }

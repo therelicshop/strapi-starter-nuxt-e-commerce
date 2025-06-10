@@ -645,11 +645,11 @@ const _inlineRuntimeConfig = {
     }
   },
   "public": {
-    "woocommerceUrl": "https://your-store.com",
+    "woocommerceUrl": "https://shop.therelic.cc",
     "apiUrl": "/api"
   },
-  "woocommerceKey": "",
-  "woocommerceSecret": ""
+  "woocommerceKey": "your_consumer_key_here",
+  "woocommerceSecret": "your_consumer_secret_here"
 };
 const envOptions = {
   prefix: "NITRO_",
@@ -1432,11 +1432,13 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_3tR9VD = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_E0fH03 = () => Promise.resolve().then(function () { return _slug__get$1; });
 const _lazy_1mvJ_H = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_LwOoCo = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
+  { route: '/api/categories', handler: _lazy_3tR9VD, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/:slug', handler: _lazy_E0fH03, lazy: true, middleware: false, method: "get" },
   { route: '/api/products', handler: _lazy_1mvJ_H, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_LwOoCo, lazy: true, middleware: false, method: undefined },
@@ -1769,47 +1771,130 @@ const styles$1 = /*#__PURE__*/Object.freeze({
   default: styles
 });
 
+const index_get$2 = defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
+  const query = getQuery$1(event);
+  try {
+    const baseUrl = `${config.public.woocommerceUrl}/wp-json/wc/v3/products/categories`;
+    const params = new URLSearchParams();
+    if (query.page) params.append("page", query.page.toString());
+    if (query.per_page) params.append("per_page", query.per_page.toString());
+    if (query.orderby) params.append("orderby", query.orderby.toString());
+    if (query.order) params.append("order", query.order.toString());
+    if (query.hide_empty) params.append("hide_empty", query.hide_empty.toString());
+    params.append("consumer_key", config.woocommerceKey);
+    params.append("consumer_secret", config.woocommerceSecret);
+    const url = `${baseUrl}?${params.toString()}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`WooCommerce API error: ${response.status} ${response.statusText}`);
+    }
+    const categories = await response.json();
+    return {
+      data: categories,
+      total: parseInt(response.headers.get("X-WP-Total") || "0")
+    };
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return {
+      data: [
+        {
+          id: 1,
+          name: "Sample Category",
+          slug: "sample-category",
+          description: "Please configure your WooCommerce API credentials.",
+          count: 0
+        }
+      ],
+      total: 1,
+      error: "Failed to connect to WooCommerce. Please check your API credentials."
+    };
+  }
+});
+
+const index_get$3 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  default: index_get$2
+});
+
 const _slug__get = defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
   const slug = getRouterParam(event, "slug");
-  const mockProducts = [
-    {
+  try {
+    const baseUrl = `${config.public.woocommerceUrl}/wp-json/wc/v3/products`;
+    const params = new URLSearchParams();
+    params.append("slug", slug);
+    params.append("consumer_key", config.woocommerceKey);
+    params.append("consumer_secret", config.woocommerceSecret);
+    const url = `${baseUrl}?${params.toString()}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`WooCommerce API error: ${response.status} ${response.statusText}`);
+    }
+    const products = await response.json();
+    if (!products || products.length === 0) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Product not found"
+      });
+    }
+    const product = products[0];
+    const transformedProduct = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      regular_price: product.regular_price,
+      sale_price: product.sale_price,
+      on_sale: product.on_sale,
+      stock_status: product.stock_status,
+      stock_quantity: product.stock_quantity,
+      short_description: product.short_description,
+      description: product.description,
+      images: product.images || [],
+      categories: product.categories || [],
+      tags: product.tags || [],
+      attributes: product.attributes || [],
+      variations: product.variations || [],
+      featured: product.featured,
+      catalog_visibility: product.catalog_visibility,
+      date_created: product.date_created,
+      date_modified: product.date_modified,
+      related_ids: product.related_ids || [],
+      cross_sell_ids: product.cross_sell_ids || [],
+      upsell_ids: product.upsell_ids || []
+    };
+    return transformedProduct;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    if (error.statusCode === 404) {
+      throw error;
+    }
+    return {
       id: 1,
-      name: "Premium Wireless Headphones",
-      slug: "premium-wireless-headphones",
-      regular_price: "199.99",
-      sale_price: "149.99",
-      on_sale: true,
-      stock_status: "instock",
-      short_description: "High-quality wireless headphones with noise cancellation.",
-      description: "<p>Experience premium sound quality with these wireless headphones featuring active noise cancellation, 30-hour battery life, and premium comfort.</p><ul><li>Active Noise Cancellation</li><li>30-hour battery life</li><li>Premium comfort design</li><li>Bluetooth 5.0 connectivity</li></ul>",
-      images: [
-        { src: "https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg?auto=compress&cs=tinysrgb&w=800" },
-        { src: "https://images.pexels.com/photos/3394651/pexels-photo-3394651.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 2,
-      name: "Smart Fitness Watch",
-      slug: "smart-fitness-watch",
-      regular_price: "299.99",
+      name: "Sample Product",
+      slug,
+      regular_price: "99.99",
       sale_price: "",
       on_sale: false,
       stock_status: "instock",
-      short_description: "Track your fitness goals with this advanced smartwatch.",
-      description: "<p>Monitor your health and fitness with GPS tracking, heart rate monitoring, and 7-day battery life.</p><ul><li>GPS tracking</li><li>Heart rate monitoring</li><li>7-day battery life</li><li>Water resistant</li></ul>",
+      short_description: "This is a sample product while connecting to WooCommerce.",
+      description: "<p>Please configure your WooCommerce API credentials to see live products.</p>",
       images: [
-        { src: "https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    }
-  ];
-  const product = mockProducts.find((p) => p.slug === slug);
-  if (!product) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Product not found"
-    });
+        { src: "https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg?auto=compress&cs=tinysrgb&w=800" }
+      ],
+      error: "Failed to connect to WooCommerce. Please check your API credentials."
+    };
   }
-  return product;
 });
 
 const _slug__get$1 = /*#__PURE__*/Object.freeze({
@@ -1818,136 +1903,80 @@ const _slug__get$1 = /*#__PURE__*/Object.freeze({
 });
 
 const index_get = defineEventHandler(async (event) => {
-  useRuntimeConfig();
+  const config = useRuntimeConfig();
   const query = getQuery$1(event);
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Premium Wireless Headphones",
-      slug: "premium-wireless-headphones",
-      regular_price: "199.99",
-      sale_price: "149.99",
-      on_sale: true,
-      stock_status: "instock",
-      short_description: "High-quality wireless headphones with noise cancellation.",
-      description: "<p>Experience premium sound quality with these wireless headphones featuring active noise cancellation, 30-hour battery life, and premium comfort.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 2,
-      name: "Smart Fitness Watch",
-      slug: "smart-fitness-watch",
-      regular_price: "299.99",
-      sale_price: "",
-      on_sale: false,
-      stock_status: "instock",
-      short_description: "Track your fitness goals with this advanced smartwatch.",
-      description: "<p>Monitor your health and fitness with GPS tracking, heart rate monitoring, and 7-day battery life.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 3,
-      name: "Portable Bluetooth Speaker",
-      slug: "portable-bluetooth-speaker",
-      regular_price: "79.99",
-      sale_price: "59.99",
-      on_sale: true,
-      stock_status: "instock",
-      short_description: "Compact speaker with powerful sound and waterproof design.",
-      description: "<p>Take your music anywhere with this waterproof Bluetooth speaker featuring 12-hour battery life and 360-degree sound.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/1649771/pexels-photo-1649771.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 4,
-      name: "Wireless Charging Pad",
-      slug: "wireless-charging-pad",
-      regular_price: "49.99",
-      sale_price: "",
-      on_sale: false,
-      stock_status: "instock",
-      short_description: "Fast wireless charging for all compatible devices.",
-      description: "<p>Charge your devices wirelessly with this sleek charging pad supporting fast charging up to 15W.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/4526414/pexels-photo-4526414.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 5,
-      name: "USB-C Hub",
-      slug: "usb-c-hub",
-      regular_price: "89.99",
-      sale_price: "69.99",
-      on_sale: true,
-      stock_status: "instock",
-      short_description: "7-in-1 USB-C hub with multiple ports and 4K HDMI output.",
-      description: "<p>Expand your laptop connectivity with this versatile hub featuring USB 3.0, HDMI 4K, SD card reader, and more.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/163100/circuit-circuit-board-resistor-computer-163100.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 6,
-      name: "Mechanical Keyboard",
-      slug: "mechanical-keyboard",
-      regular_price: "129.99",
-      sale_price: "",
-      on_sale: false,
-      stock_status: "instock",
-      short_description: "RGB backlit mechanical keyboard with tactile switches.",
-      description: "<p>Enhance your typing experience with this premium mechanical keyboard featuring customizable RGB lighting and durable switches.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/2115257/pexels-photo-2115257.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 7,
-      name: "Laptop Stand",
-      slug: "laptop-stand",
-      regular_price: "39.99",
-      sale_price: "29.99",
-      on_sale: true,
-      stock_status: "instock",
-      short_description: "Adjustable aluminum laptop stand for better ergonomics.",
-      description: "<p>Improve your workspace ergonomics with this adjustable laptop stand made from premium aluminum.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/1029757/pexels-photo-1029757.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
-    },
-    {
-      id: 8,
-      name: "Webcam HD 1080p",
-      slug: "webcam-hd-1080p",
-      regular_price: "69.99",
-      sale_price: "",
-      on_sale: false,
-      stock_status: "instock",
-      short_description: "Crystal clear HD webcam with auto-focus and built-in microphone.",
-      description: "<p>Perfect for video calls and streaming with 1080p resolution, auto-focus, and noise-canceling microphone.</p>",
-      images: [
-        { src: "https://images.pexels.com/photos/4348401/pexels-photo-4348401.jpeg?auto=compress&cs=tinysrgb&w=800" }
-      ]
+  try {
+    const baseUrl = `${config.public.woocommerceUrl}/wp-json/wc/v3/products`;
+    const params = new URLSearchParams();
+    if (query.page) params.append("page", query.page.toString());
+    if (query.per_page) params.append("per_page", query.per_page.toString());
+    if (query.orderby) params.append("orderby", query.orderby.toString());
+    if (query.order) params.append("order", query.order.toString());
+    if (query.featured) params.append("featured", "true");
+    if (query.category) params.append("category", query.category.toString());
+    if (query.search) params.append("search", query.search.toString());
+    params.append("consumer_key", config.woocommerceKey);
+    params.append("consumer_secret", config.woocommerceSecret);
+    const url = `${baseUrl}?${params.toString()}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`WooCommerce API error: ${response.status} ${response.statusText}`);
     }
-  ];
-  let filteredProducts = [...mockProducts];
-  if (query.featured) {
-    filteredProducts = filteredProducts.slice(0, parseInt(query.per_page) || 8);
+    const products = await response.json();
+    const transformedProducts = products.map((product) => ({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      regular_price: product.regular_price,
+      sale_price: product.sale_price,
+      on_sale: product.on_sale,
+      stock_status: product.stock_status,
+      short_description: product.short_description,
+      description: product.description,
+      images: product.images || [],
+      categories: product.categories || [],
+      tags: product.tags || [],
+      attributes: product.attributes || [],
+      variations: product.variations || [],
+      featured: product.featured,
+      catalog_visibility: product.catalog_visibility,
+      date_created: product.date_created,
+      date_modified: product.date_modified
+    }));
+    return {
+      data: transformedProducts,
+      total: parseInt(response.headers.get("X-WP-Total") || "0"),
+      totalPages: parseInt(response.headers.get("X-WP-TotalPages") || "0")
+    };
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    const mockProducts = [
+      {
+        id: 1,
+        name: "Sample Product",
+        slug: "sample-product",
+        regular_price: "99.99",
+        sale_price: "",
+        on_sale: false,
+        stock_status: "instock",
+        short_description: "This is a sample product while connecting to WooCommerce.",
+        description: "<p>Please configure your WooCommerce API credentials to see live products.</p>",
+        images: [
+          { src: "https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg?auto=compress&cs=tinysrgb&w=800" }
+        ]
+      }
+    ];
+    return {
+      data: mockProducts,
+      total: 1,
+      error: "Failed to connect to WooCommerce. Please check your API credentials."
+    };
   }
-  if (query.per_page) {
-    const perPage = parseInt(query.per_page);
-    const page = parseInt(query.page) || 1;
-    const start = (page - 1) * perPage;
-    filteredProducts = filteredProducts.slice(start, start + perPage);
-  }
-  return {
-    data: filteredProducts,
-    total: mockProducts.length
-  };
 });
 
 const index_get$1 = /*#__PURE__*/Object.freeze({

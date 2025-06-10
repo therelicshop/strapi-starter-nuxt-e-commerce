@@ -4,10 +4,10 @@
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <NuxtLink to="/" class="flex items-center space-x-2">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-lg">S</span>
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-lg">R</span>
           </div>
-          <span class="text-xl font-bold text-gray-900">Store</span>
+          <span class="text-xl font-bold text-gray-900">The Relic</span>
         </NuxtLink>
 
         <!-- Navigation -->
