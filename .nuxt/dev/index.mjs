@@ -648,8 +648,8 @@ const _inlineRuntimeConfig = {
     "woocommerceUrl": "https://shop.therelic.cc",
     "apiUrl": "/api"
   },
-  "woocommerceKey": "your_consumer_key_here",
-  "woocommerceSecret": "your_consumer_secret_here"
+  "woocommerceKey": "",
+  "woocommerceSecret": ""
 };
 const envOptions = {
   prefix: "NITRO_",
